@@ -1,3 +1,5 @@
+var url_uri = "http://localhost:4242";
+
 // Shorthand for $( document ).ready()
 $(function() {
 
@@ -20,8 +22,8 @@ $(function() {
 
 		// Send 
 		$.ajax({
-		  url: "/set",
-		  type: "get", //send it through get method
+		  url: url_uri + "/set",
+		  type: "post", //send it through get method
 		  data: { 
 		    temperature: temperature, 
 		    heater: heater, 
@@ -41,8 +43,8 @@ $(function() {
 	$('#btnTurnOff').on('click', function(){
 		// Send 
 		$.ajax({
-		  url: "/off",
-		  type: "get", //send it through get method
+		  url: url_uri + "/off",
+		  type: "post", //send it through get method
 		  success: function(response) {
 		    console.log(response);
 		    update_status(false);
@@ -95,29 +97,38 @@ function update_status(rearm)
 	var ajaxTime= new Date().getTime();
 
 	$.ajax({
-	url: "/status",
+	url: url_uri + "/status",
 	type: "get", //send it through get method
 	success: function(response) {
 		console.log(response);
+		var res = response;
+		//var res = jQuery.parseJSON(response);
 
-		var res = jQuery.parseJSON(response);
-
-		$('#status-temp-target').text(res.target_temp_in);
 		$('#status-fan-speed').text(res.fan_speed);
-		$('#status-temp-inside').text(res.temp_in.toFixed(1));
-		$('#status-temp-inside2').text(res.temp_in.toFixed(1));
-		$('#status-temp-inside-target').text(res.target_temp_in.toFixed(1));
-		$('#status-temp-heater').text(res.temp_heater.toFixed(0));
-		$('#status-temp-heater-max').text(res.max_temp_heater.toFixed(0));
-		$('#status-humidity-inside').text(res.humid_in.toFixed(0));
-		$('#status-temp-outside').text(res.temp_out.toFixed(0));
-		$('#status-humidity-outside').text(res.humid_out.toFixed(0));
+		$('#status-temp-inside').text(res.sensor_in.temp);
+		$('#status-temp-inside2').text(res.sensor_in.temp);
+		$('#status-humidity-inside').text(res.sensor_in.humid);
+		if (res.sensor_in.status === 1) {
+			$('#status-connected-inside').text("yes");
+		} else {
+			$('#status-connected-inside').text("no");
+		}
+		$('#status-temp-outside').text(res.sensor_out.temp);
+		$('#status-humidity-outside').text(res.sensor_out.humid);
+		if (res.sensor_in.status === 1) {
+			$('#status-connected-outside').text("yes");
+		} else {
+			$('#status-connected-outside').text("no");
+		}
+		$('#status-temp-target').text(res.target_temp_in);
+		$('#status-temp-heater-max').text(res.max_temp_heater);
+		$('#status-temp-inside-target').text(res.target_temp_in);
+		$('#status-temp-heater').text(res.temp_heater);
 
 		// Homed status
-		if(res.status == 1) {
+		if (res.status == 1) {
 			$('#status-box').text('Dry box is on').addClass('badge-success').removeClass('badge-warning').removeClass('badge-danger');
-		}
-		else {
+		} else {
 			$('#status-box').text('Dry box is off').addClass('badge-warning').removeClass('badge-success').removeClass('badge-danger');
 		}
 
